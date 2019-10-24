@@ -21,6 +21,7 @@ class Page1ViewController: UITableViewController, SegementSlideContentScrollView
     var publishedAtArray = [String]()
     var titleArray = [String]()
     var imageURLStringArray = [String]()
+    var youtubeURLArray = [String]()
     var channelTitleArray = [String]()
     
     
@@ -50,28 +51,86 @@ class Page1ViewController: UITableViewController, SegementSlideContentScrollView
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-
-        // Configure the cell...
-
+        
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "Cell")
+        // セルを選択時に背景をグレーにしない
+        cell.selectionStyle = .none
+        // URL型にキャスト
+        let profileImageURL = URL(string: imageURLStringArray[indexPath.row] as String)!
+        // URLを画像に変換
+        cell.imageView?.sd_setImage(with: profileImageURL, completed: nil)
+        
+        cell.textLabel!.text = titleArray[indexPath.row]
+        cell.detailTextLabel!.text = publishedAtArray[indexPath.row]
+        cell.textLabel?.adjustsFontSizeToFitWidth = true
+        cell.detailTextLabel?.adjustsFontSizeToFitWidth = true
+        cell.textLabel?.numberOfLines = 5
+        cell.detailTextLabel?.numberOfLines = 5
+        
         return cell
+        
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return view.frame.size.height/5
     }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let indexNumber = indexPath.row
+        let webViewController = UIViewController()
+        let url = youtubeURLArray[indexNumber]
+        UserDefaults.standard.set(url, forKey: "url")
+        present(webViewController, animated: true, completion: nil)
+        
+        
+        
+    }
 
     func getData() {
         
-        var text = "https://www.googleapis.com/youtube/v3/search?key=APIKEY&q=検索ワード&part=snippet&maxResults=40&order=date"
+        var text = "https://www.googleapis.com/youtube/v3/search?key=APIKEY&q=那須川天心&part=snippet&maxResults=40&order=date"
         
         // URLに日本語等が入っている場合に変換するメソッド
         let url = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
         
         //Requestを送る
-        //JSON解析
-        //40個値が入ってくるので、for文で全て配列に入れる
-        
+        request(url!, method: .get, parameters: nil, encoding: JSONEncoding.default).responseJSON { (responce) in
+            
+            //JSON解析
+            //40個値が入ってくるので、for文で全て配列に入れる
+            
+            print(responce)
+            
+            switch responce.result {
+                
+            case .success:
+                
+                for i in 0...39 {
+                    
+                    let json: JSON = JSON(responce.data as Any)
+                    let videoId = json["items"][i]["id"]["videoId"].string
+                    let publishedAt = json["items"][i]["snippet"]["publishedAt"].string
+                    let title = json["items"][i]["snippet"]["title"].string
+                    let imageURL = json["items"][i]["snippet"]["thumbnails"]["default"]["url"].string
+                    let youtubeURL = "https://www.youtube.com/watch?v=\(videoId)"
+                    let channelTitle = json["items"][i]["snippet"]["channelTitle"].string
+                    
+                    self.videoIdArray.append(videoId!)
+                    self.publishedAtArray.append(publishedAt!)
+                    self.titleArray.append(title!)
+                    self.imageURLStringArray.append(imageURL!)
+                    self.channelTitleArray.append(channelTitle!)
+                    self.youtubeURLArray.append(youtubeURL)
+                }
+                
+            case .failure(let error):
+                print(error)
+                break
+                
+            }
+        }
+
     }
     
     /*
