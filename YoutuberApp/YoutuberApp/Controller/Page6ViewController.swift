@@ -12,7 +12,7 @@ import Alamofire
 import SwiftyJSON
 import SDWebImage
 
-class Page1ViewController: UITableViewController, SegementSlideContentScrollViewDelegate {
+class Page6ViewController: UITableViewController, SegementSlideContentScrollViewDelegate {
 
     //JSONデータを全て１つのArrayに入れても良いが、ここでは分ける
     var youtubeData = YoutubeData()
@@ -110,7 +110,7 @@ class Page1ViewController: UITableViewController, SegementSlideContentScrollView
 
     func getData() {
         
-        var text = "https://www.googleapis.com/youtube/v3/search?key=AIzaSyBSRfx6mz-9qI5G9wuJ95roA7guu8y3gKk&q=那須川天心&part=snippet&maxResults=40&order=date"
+        var text = "https://www.googleapis.com/youtube/v3/search?key=AIzaSyBSRfx6mz-9qI5G9wuJ95roA7guu8y3gKk&q=猫&part=snippet&maxResults=40&order=date"
         
         // URLに日本語等が入っている場合に変換するメソッド
         let url = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
@@ -121,7 +121,7 @@ class Page1ViewController: UITableViewController, SegementSlideContentScrollView
             //JSON解析
             //40個値が入ってくるので、for文で全て配列に入れる
             
-            //print(responce)
+            print(responce)
             
             switch responce.result {
                 
